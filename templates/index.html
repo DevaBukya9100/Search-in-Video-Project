@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>svv</title>  
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #222;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+        }
+
+        h1 {
+            color: white;
+            margin-top: 20px;
+        }
+
+        
+        #keyword {
+            padding: 10px;
+            width: 300px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: #333;
+            color: white;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #ff6b81;
+        }
+
+        
+        #video-container {
+            position: relative;
+            margin-top: 30px;
+            width: 80%;
+            max-width: 800px;
+            background-color: black;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        video {
+            display: block;
+            width: 100%;
+            height: auto; 
+            max-height: 450px; 
+            border-radius: 8px;
+        }
+
+      
+        #message {
+            color: white;
+            margin-top: 20px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        
+        @media (max-width: 768px) {
+            #keyword {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Search in Video</h1>
+    <input type="text" id="keyword" placeholder="Enter keyword">
+    <button onclick="searchKeyword()">Search</button>
+    <div id="message"></div>
+
+    <div id="video-container">
+        <video id="video" controls>
+            <source src="{{ url_for('static', filename='videoplay.mp4') }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <script>
+        async function searchKeyword() {
+            const keyword = document.getElementById('keyword').value;
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ keyword }),
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.timestamps.length > 0) {
+                    const video = document.getElementById('video');
+                    video.currentTime = data.timestamps[0]; 
+                    video.play();
+                    document.getElementById('message').innerText = `Playing video from ${data.timestamps[0]} seconds.`;
+                } else {
+                    document.getElementById('message').innerText = 'Keyword not found in the video.';
+                }
+            } else {
+                alert('Error occurred: ' + response.statusText);
+            }
+        }
+    </script>
+</body>
+</html>
+
